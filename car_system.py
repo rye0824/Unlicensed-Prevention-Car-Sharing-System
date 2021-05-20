@@ -1,6 +1,7 @@
 import Jetson.GPIO as GPIO
 import time
-
+import os
+import test
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -56,26 +57,32 @@ def stop(): #motor off
     GPIO.output(IN2_pin, GPIO.LOW) 
     GPIO.output(IN3_pin, GPIO.LOW) 
     GPIO.output(IN4_pin, GPIO.LOW)
-  
+
+matching_score = test.dist
 
 try: 
-    right()
-
-    while True:
-        a = GPIO.input(tog_pin)
-        b = GPIO.input(btn_pin)
-        
-        if a == 1:
-            print("START")
-            go()
-            if b == 0:
-                print("BRAKE")
-                brake()
-                
-        else:
-            print("STOP")
-            stop()
+    if (matching_score > 0.60):
+        right()
+    
+        while True:
+            start_push = GPIO.input(tog_pin)
+            brake_push = GPIO.input(btn_pin)
             
-        
+            if start_push == 1:
+                print("START")
+                go()
+                if brake_push == 0:
+                    print("BRAKE")
+                    brake()
+                    matching_score = test.dist
+                    if matching_score < 0.6:
+                        wrong()
+            
+            else:
+                print("STOP")
+                stop()
+    else:
+        wrong()       
 except KeyboardInterrupt:
     GPIO.cleanup()
+    pwm.stop()
